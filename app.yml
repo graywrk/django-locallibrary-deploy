@@ -1,8 +1,0 @@
----
-- name: Configure django application
-  hosts: all
-  become: true
-  tasks:
-    - name: Run apt-get update
-      ansible.builtin.apt:
-        update_cache: yes
