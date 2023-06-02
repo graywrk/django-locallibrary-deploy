@@ -1,0 +1,55 @@
+---
+- name: Configure db (PostgreSQL)
+  hosts: db
+  become: true
+  vars:
+    postgresql_users:
+      - name: "locallibrary"
+        password: "p@$$w0rd"
+        encrypted: 'yes'
+        role_attr_flags: NOSUPERUSER
+    postgresql_dbs:
+      - db: locallibrary
+        user: locallibrary
+        encoding: UNICODE
+  roles: 
+    - graywrk.ansible_role_postgresql
+
+- name: Configure django application
+  hosts: app
+  become: true
+  vars:
+    - project: "django-locallibrary"
+    - project_dir: "/app"
+    - user_name: "app"
+    - user_password: "p@$$w0rd"
+  tasks:
+    - name: Django | Install packages
+      ansible.builtin.apt:
+        name:
+          - python3-pip
+          - python3-dev
+          - libpq-dev
+          - supervisor
+          - uwsgi
+          - uwsgi-plugin-python
+      state: present
+      update_cache: yes
+
+    - name: Django | Install python packages
+      ansible.builtin.pip:
+        name: 
+          - django
+          - gunicorn
+          - psycopg2-binary
+
+    - name: Django | Copy supervisor.conf
+      ansible.builtin.template:
+        src: supervisor.conf
+        dest: /etc/supervisor/conf.d/{{ project }}.conf
+
+    - name: Django | Create user
+      ansible.builtin.user:
+        name: {{ user_name }}
+        shell: /bin/bash
+        home: /home/{{ user_name }}

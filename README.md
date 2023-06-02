@@ -4,7 +4,7 @@
 в Vagrantfile заменить путь к приватным ключам на свой
 
 ```
-ansible-galaxy install -r requirements.yml --force
+ansible-galaxy install -r ansible/requirements.yml --force
 vagrant up
-ansible-playbook -i inventory provision.yml
+ansible-playbook -i ansible/inventory ansible/provision.yml
 ```
